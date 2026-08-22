@@ -39,7 +39,7 @@ class HTMLNode:
 class LeafNode(HTMLNode):
     
     def __init__(self, tag, value, props=None):
-        if not value:
+        if value is None:
             raise ValueError("Value is required.")
         super().__init__(value=value, tag=tag, props=props)
 
