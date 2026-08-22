@@ -1,4 +1,5 @@
-from enum import Enum
+# TODO: Refactor by removing Children attribute and value attribute 
+# to allow child classes to define their own behavior
 
 class HTMLNode:
     def __init__(self, 
@@ -62,3 +63,27 @@ class LeafNode(HTMLNode):
             return NotImplemented
 
         return (self.tag, self.value,  self.props) == (other.tag, other.value, other.props)
+
+class ParentNode(HTMLNode):
+
+    def __init__(self, tag, children, props=None):
+
+        super().__init__(tag=tag, children=children, props=props)
+
+    def to_html(self):
+        if not self.tag:
+            raise ValueError("Tag is required")
+        if not self.children:
+            raise ValueError("Children are required")
+
+
+        child_html = ''
+        for child in self.children:
+            child_html += child.to_html()
+
+        if self.props != None:
+
+            return f"<{self.tag} {self.props_to_html()}>{child_html}</{self.tag}>"
+
+        return f"<{self.tag}>{child_html}</{self.tag}>" 
+
