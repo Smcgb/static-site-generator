@@ -45,7 +45,7 @@ class LeafNode(HTMLNode):
 
         self.children = None
 
-    def to_html(self):
+    def to_html(self) -> str:
         if self.tag in [None, ""]:
             return self.value
         
@@ -70,7 +70,7 @@ class ParentNode(HTMLNode):
 
         super().__init__(tag=tag, children=children, props=props)
 
-    def to_html(self):
+    def to_html(self) -> str:
         if not self.tag:
             raise ValueError("Tag is required")
         if not self.children:
