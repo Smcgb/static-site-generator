@@ -97,3 +97,13 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
 
 
 
+def text_to_textnodes(text: str) -> list[TextNode]:
+
+    node = [TextNode(text, TextType.TEXT)]
+
+    new_nodes = split_nodes_link(split_nodes_image(node))
+
+    for delimiter in delimiters:
+        new_nodes = split_nodes_delimiter(new_nodes, delimiter, delimiters[delimiter])
+
+    return new_nodes
