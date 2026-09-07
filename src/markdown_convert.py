@@ -1,6 +1,17 @@
 import re
+from enum import Enum
 
 from textnode import TextNode, TextType
+
+
+class BlockType(Enum):
+    PARAGRAPH = 'paragraph'
+    HEADING = 'heading'
+    CODE = 'code'
+    QUOTE = 'quote'
+    UL ='unordered_list'
+    OL = 'ordered_list'
+
 
 delimiters = {
     "**": TextType.BOLD,
@@ -8,7 +19,6 @@ delimiters = {
     "_": TextType.ITALIC,
     "`": TextType.CODE
 }
-
 
 def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
 
@@ -103,7 +113,42 @@ def text_to_textnodes(text: str) -> list[TextNode]:
 
     new_nodes = split_nodes_link(split_nodes_image(node))
 
-    for delimiter in delimiters:
-        new_nodes = split_nodes_delimiter(new_nodes, delimiter, delimiters[delimiter])
+    for k, v in delimiters.items():
+        new_nodes = split_nodes_delimiter(new_nodes, k, v)
 
     return new_nodes
+
+def markdown_to_blocks(markdown: str) -> list[str]:
+
+    return [x.strip() for x in markdown.split('\n\n') if x != '']
+
+def block_to_blocktype(md_block: str) -> BlockType:
+
+    # early exit
+    if len(md_block) == 0:
+        return BlockType.PARAGRAPH
+
+    if re.match(r'#{1,6} .*$', md_block):
+        return BlockType.HEADING
+    
+    if re.match(r'```\n[\s\S]*?```$', md_block):
+        return BlockType.CODE
+
+    lines = md_block.split('\n')
+    
+    if all(line.startswith('>') for line in lines):
+        return BlockType.QUOTE
+    
+    if all(line.startswith('- ') for line in lines):
+        return BlockType.UL
+
+            
+    if all(re.match(fr'^{i+1}\. ', line) for i, line in enumerate(lines)):
+        return BlockType.OL
+        
+    return BlockType.PARAGRAPH
+    
+
+    
+
+

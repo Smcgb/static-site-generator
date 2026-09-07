@@ -103,5 +103,116 @@ class TestMarkdownConverter(unittest.TestCase):
             new_nodes
         )
 
+    def test_markdown_to_blocks(self):
+        #TODO learn the dedent lib
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+        """
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+                [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+                ],
+            )
+
+    def test_block_to_blocktype_paragraph(self):
+        cases = [
+            ("", BlockType.PARAGRAPH), # empty string should be paragraph
+            ("   ", BlockType.PARAGRAPH),
+            ("just some text", BlockType.PARAGRAPH),
+            ("line one\nline two", BlockType.PARAGRAPH),
+            ("this - has a dash", BlockType.PARAGRAPH),
+        ]
+
+        for block, expected in cases:
+            with self.subTest(block=block):
+                self.assertEqual(block_to_blocktype(block), expected)
+
+    def test_block_to_blocktype_header(self):
+        cases = [
+            ("# Heading", BlockType.HEADING),
+            ("###### Six hashes", BlockType.HEADING),
+            ("# ", BlockType.HEADING),                    # trailing space, empty title still matches
+            ("####### Seven hashes", BlockType.PARAGRAPH),
+            ("#No space", BlockType.PARAGRAPH),
+            (" # Leading space", BlockType.PARAGRAPH),
+            ("# Heading\nwith a second line", BlockType.PARAGRAPH),
+        ]
+
+        for block, expected in cases:
+            with self.subTest(block=block):
+                self.assertEqual(block_to_blocktype(block), expected)
+
+    def test_block_to_blocktype_code(self):
+        cases = [
+            ("```\ncode here\n```", BlockType.CODE),
+            ("```\n\n```", BlockType.CODE),
+            ("```python\nprint()\n```", BlockType.PARAGRAPH),
+            ("```code```", BlockType.PARAGRAPH),
+            ("```\ncode\n```\ntrailing", BlockType.PARAGRAPH),
+            ("```\nunclosed", BlockType.PARAGRAPH),
+        ]
+    
+        for block, expected in cases:
+            with self.subTest(block=block):
+                self.assertEqual(block_to_blocktype(block), expected)
+
+    def test_block_to_blocktype_quote(self):
+            cases = [
+                ("> quote", BlockType.QUOTE),
+                ("> line one\n> line two", BlockType.QUOTE),
+                (">no space", BlockType.QUOTE), # space not required
+                (">", BlockType.QUOTE),
+                ("> line one\nline two", BlockType.PARAGRAPH),
+                ("> line one\n\n> line two", BlockType.PARAGRAPH),
+            ]
+        
+            for block, expected in cases:
+                with self.subTest(block=block):
+                    self.assertEqual(block_to_blocktype(block), expected)
+
+    def test_block_to_blocktype_ul(self):
+        cases = [
+            ("- item", BlockType.UL),
+            ("- one\n- two\n- three", BlockType.UL),
+            ("-no space", BlockType.PARAGRAPH),
+            ("* star bullet", BlockType.PARAGRAPH),
+            ("- one\n- two\nthree", BlockType.PARAGRAPH),
+            ("- one\n  - nested", BlockType.PARAGRAPH),
+        ]
+    
+        for block, expected in cases:
+            with self.subTest(block=block):
+                self.assertEqual(block_to_blocktype(block), expected)
+
+    def test_block_to_blocktype_ol(self):
+        cases = [
+            ("1. item", BlockType.OL),
+            ("1. one\n2. two\n3. three", BlockType.OL),
+            ("1. one\n3. three", BlockType.PARAGRAPH),    # must increment by one
+            ("2. two\n3. three", BlockType.PARAGRAPH),    # must start at 1
+            ("0. zero\n1. one", BlockType.PARAGRAPH),
+            ("1.no space", BlockType.PARAGRAPH),
+            ("1) one\n2) two", BlockType.PARAGRAPH),
+            ("1. one\n2. two\nthree", BlockType.PARAGRAPH),
+        ]
+    
+        for block, expected in cases:
+            with self.subTest(block=block):
+                self.assertEqual(block_to_blocktype(block), expected)
+
+
+        
+
+
 if __name__ == "__main__":
     unittest.main()
