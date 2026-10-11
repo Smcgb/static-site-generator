@@ -6,8 +6,9 @@ rather than relying on an existing library.
 
 It converts Markdown source files into a tree of HTML nodes and renders that
 tree to HTML strings. It copies static assets (CSS, images) into the output
-directory, renders `content/index.md` into an HTML page using `template.html`,
-and serves the result locally.
+directory, renders every Markdown page under `content/` into HTML using
+`template.html` (mirroring the directory structure), and serves the result
+locally.
 
 ## How it works
 
@@ -36,6 +37,9 @@ The pipeline is split into a few layers:
   `# H1` heading out of a Markdown document, and `generate_page` converts the
   Markdown to HTML and substitutes it into `template.html` (replacing
   `{{ Title }}` and `{{ Content }}`), writing the result to `public/`.
+  `generate_pages_recursive` walks `content/` and calls `generate_page` for
+  every `.md` file, so `content/blog/tom/index.md` becomes
+  `public/blog/tom/index.html`.
 
 ## Project layout
 
@@ -44,11 +48,11 @@ static-site-generator/
 ├── main.sh           # entry point: builds the site and serves it
 ├── test.sh           # runs the unit test suite
 ├── template.html     # HTML template with {{ Title }} / {{ Content }}
-├── content/          # Markdown source pages (index.md)
+├── content/          # Markdown source pages (index.md, blog/*, contact/)
 ├── src/
 │   ├── main.py              # builds the site into public/
 │   ├── recursive_copy.py    # clean_folder / recursive_copy
-│   ├── generate_webpage.py  # extract_title / generate_page
+│   ├── generate_webpage.py  # extract_title / generate_page(s_recursive)
 │   ├── textnode.py          # TextNode/TextType + HTML conversion
 │   ├── htmlnode.py          # HTMLNode/LeafNode/ParentNode
 │   ├── markdown_convert.py  # Markdown parsing -> HTML node tree
@@ -67,8 +71,10 @@ Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/) (see
 ```
 
 This deletes the existing `public/` directory, recopies everything from
-`static/` into it, generates `public/index.html` from `content/index.md`, and
-then serves `public/` at <http://localhost:8888>.
+`static/` into it, generates an HTML page in `public/` for every Markdown
+file in `content/` (e.g. `content/contact/index.md` →
+`public/contact/index.html`), and then serves `public/` at
+<http://localhost:8888>.
 
 ## Testing
 
@@ -81,8 +87,6 @@ Runs the full `unittest` suite under `src/` (`test_htmlnode.py`,
 
 ## Status / TODO
 
-- `main.py` currently renders only `content/index.md` — it doesn't yet walk
-  the whole `content/` directory and render every Markdown file to a page.
 - `HTMLNode` has a noted TODO to drop the shared `children`/`value`
   attributes from the base class and let `LeafNode`/`ParentNode` each define
   their own.
