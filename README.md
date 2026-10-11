@@ -28,7 +28,7 @@ The pipeline is split into a few layers:
     block (`paragraph`, `heading`, `code`, `quote`, unordered/ordered list).
   - Converts each block into the matching `ParentNode` tree
     (`markdown_to_html_node`), which can then be rendered with `.to_html()`.
-- **Asset copying** (`src/recurisve_copy.py`) — `clean_folder` wipes the
+- **Asset copying** (`src/recursive_copy.py`) — `clean_folder` wipes the
   `public/` output directory and `recursive_copy` copies everything from
   `static/` into `public/`, recreating the directory structure (implemented
   by hand rather than with `shutil.copytree`, per the course requirements).
@@ -47,7 +47,7 @@ static-site-generator/
 ├── content/          # Markdown source pages (index.md)
 ├── src/
 │   ├── main.py              # builds the site into public/
-│   ├── recurisve_copy.py    # clean_folder / recursive_copy
+│   ├── recursive_copy.py    # clean_folder / recursive_copy
 │   ├── generate_webpage.py  # extract_title / generate_page
 │   ├── textnode.py          # TextNode/TextType + HTML conversion
 │   ├── htmlnode.py          # HTMLNode/LeafNode/ParentNode
@@ -89,8 +89,9 @@ Runs the full `unittest` suite under `src/` (`test_htmlnode.py`,
 
 ## AI Disclosure
 
-All of the code in this project was written by me. Generative AI (Claude)
-was used only to write this README and occasionally to answer clarifying
-questions. The only AI-written changes are README edits: the initial
-"Add README" commit and later README commits marked with a
-`Co-Authored-By: Claude` trailer. Every code commit is entirely my own work.
+All of the program logic and tests in this project were written by me.
+Generative AI (Claude) was used to write this README, to occasionally answer
+clarifying questions, and for one mechanical change: renaming
+`recurisve_copy.py` to `recursive_copy.py` and updating its import. The
+initial "Add README" commit is AI-written; every later AI commit is marked
+with a `Co-Authored-By: Claude` trailer.

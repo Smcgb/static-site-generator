@@ -1,5 +1,5 @@
 from generate_webpage import *
-from recurisve_copy import clean_folder, recursive_copy
+from recursive_copy import clean_folder, recursive_copy
 
 
 def main():
