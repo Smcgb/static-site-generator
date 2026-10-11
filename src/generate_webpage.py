@@ -13,13 +13,13 @@ def extract_title(markdown: str) -> str:
     return heading.group()[1:].strip()
 
 
-def generate_page(source: str, template: str, destination: str) -> None:
+def generate_page(source: str, html_template: str, destination: str) -> None:
 
-    print(f"Generating page from {source} to {destination} using {template}")
+    print(f"Generating page from {source} to {destination} using {html_template}")
 
     with open(source) as f:
         md = f.read()
-    with open(template) as f:
+    with open(html_template) as f:
         html_template = f.read()
 
     content = markdown_to_html_node(md)
@@ -31,3 +31,19 @@ def generate_page(source: str, template: str, destination: str) -> None:
     os.makedirs(os.path.dirname(destination), exist_ok=True)
     with open(destination, "w") as f:
         f.write(page)
+
+
+def generate_pages_recursive(source, html_template, destination):
+
+    if not os.path.exists(source):
+         raise FileNotFoundError(f"source does not exist: {source}")
+    if not os.path.exists(destination):
+        os.mkdir(destination)
+
+    for item in os.listdir(source):
+        path = f"{source}/{item}"
+        if os.path.isdir(path):
+            generate_pages_recursive(path, html_template, f"{destination}/{item}")
+        elif item.endswith(".md"):
+            name, extension = item.split(".")
+            generate_page(path, html_template, f"{destination}/{name}.html")
