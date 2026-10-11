@@ -1,8 +1,9 @@
 import re
 from enum import Enum
 
-from textnode import TextNode, TextType, text_node_to_html_node
 from htmlnode import HTMLNode, LeafNode, ParentNode
+from textnode import TextNode, TextType, text_node_to_html_node
+
 
 class BlockType(Enum):
     PARAGRAPH = 'paragraph'
