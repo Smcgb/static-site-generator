@@ -5,8 +5,9 @@ project) to understand how Markdown-to-HTML pipelines work under the hood
 rather than relying on an existing library.
 
 It converts Markdown source files into a tree of HTML nodes and renders that
-tree to HTML strings. It also handles copying static assets (CSS, images)
-into the output directory.
+tree to HTML strings. It copies static assets (CSS, images) into the output
+directory, renders `content/index.md` into an HTML page using `template.html`,
+and serves the result locally.
 
 ## How it works
 
@@ -27,19 +28,27 @@ The pipeline is split into a few layers:
     block (`paragraph`, `heading`, `code`, `quote`, unordered/ordered list).
   - Converts each block into the matching `ParentNode` tree
     (`markdown_to_html_node`), which can then be rendered with `.to_html()`.
-- **Asset copying** (`src/main.py`) — `clean_folder` wipes the `public/`
-  output directory and `recursive_copy` copies everything from `static/`
-  into `public/`, recreating the directory structure (implemented by hand
-  rather than with `shutil.copytree`, per the course requirements).
+- **Asset copying** (`src/recurisve_copy.py`) — `clean_folder` wipes the
+  `public/` output directory and `recursive_copy` copies everything from
+  `static/` into `public/`, recreating the directory structure (implemented
+  by hand rather than with `shutil.copytree`, per the course requirements).
+- **Page generation** (`src/generate_webpage.py`) — `extract_title` pulls the
+  `# H1` heading out of a Markdown document, and `generate_page` converts the
+  Markdown to HTML and substitutes it into `template.html` (replacing
+  `{{ Title }}` and `{{ Content }}`), writing the result to `public/`.
 
 ## Project layout
 
 ```
 static-site-generator/
-├── main.sh           # entry point: runs src/main.py
+├── main.sh           # entry point: builds the site and serves it
 ├── test.sh           # runs the unit test suite
+├── template.html     # HTML template with {{ Title }} / {{ Content }}
+├── content/          # Markdown source pages (index.md)
 ├── src/
-│   ├── main.py              # cleans/copies static -> public
+│   ├── main.py              # builds the site into public/
+│   ├── recurisve_copy.py    # clean_folder / recursive_copy
+│   ├── generate_webpage.py  # extract_title / generate_page
 │   ├── textnode.py          # TextNode/TextType + HTML conversion
 │   ├── htmlnode.py          # HTMLNode/LeafNode/ParentNode
 │   ├── markdown_convert.py  # Markdown parsing -> HTML node tree
@@ -50,14 +59,16 @@ static-site-generator/
 
 ## Usage
 
-Requires Python 3.13+ (see `.python-version` / `pyproject.toml`).
+Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/) (see
+`.python-version` / `pyproject.toml`).
 
 ```sh
 ./main.sh
 ```
 
-This deletes the existing `public/` directory and recopies everything from
-`static/` into it.
+This deletes the existing `public/` directory, recopies everything from
+`static/` into it, generates `public/index.html` from `content/index.md`, and
+then serves `public/` at <http://localhost:8888>.
 
 ## Testing
 
@@ -66,16 +77,20 @@ This deletes the existing `public/` directory and recopies everything from
 ```
 
 Runs the full `unittest` suite under `src/` (`test_htmlnode.py`,
-`test_textnode.py`, `test_markdown_converter.py`).
+`test_textnode.py`, `test_markdown_converter.py`, `test_generate_webpage.py`).
 
 ## Status / TODO
 
-- `main.py` currently only copies static assets — it doesn't yet walk a
-  `content/` directory of Markdown files and render them to HTML pages.
+- `main.py` currently renders only `content/index.md` — it doesn't yet walk
+  the whole `content/` directory and render every Markdown file to a page.
 - `HTMLNode` has a noted TODO to drop the shared `children`/`value`
   attributes from the base class and let `LeafNode`/`ParentNode` each define
   their own.
 
 ## AI Disclosure
 
-Generative AI was used to create the markdown and sometimes to ask clarifying questions but no code was generated with the exception of the README file.
+All of the code in this project was written by me. Generative AI (Claude)
+was used only to write this README and occasionally to answer clarifying
+questions. The only AI-written changes are README edits: the initial
+"Add README" commit and later README commits marked with a
+`Co-Authored-By: Claude` trailer. Every code commit is entirely my own work.
