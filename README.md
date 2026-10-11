@@ -75,3 +75,7 @@ Runs the full `unittest` suite under `src/` (`test_htmlnode.py`,
 - `HTMLNode` has a noted TODO to drop the shared `children`/`value`
   attributes from the base class and let `LeafNode`/`ParentNode` each define
   their own.
+
+## AI Disclosure
+
+Generative AI was used to create the markdown and sometimes to ask clarifying questions but no code was generated with the exception of the README file.
